@@ -1,3 +1,4 @@
+import sys
 from typing import List, NamedTuple
 from collections import namedtuple
 
@@ -7,7 +8,41 @@ class Instruction(NamedTuple):
     mode2: bool
     mode3: bool
 
-runInstruction = lambda op,p,pc,i: op(p,pc,i)
+#TODO: Not working
+parameter1 = lambda p,pc,mode: p[p[pc+1]] if not mode else p[pc+1]
+parameter2 = lambda p,pc,mode: p[p[pc+1]] if not mode else p[pc+1]
+def jumpIfTrue(program: List[int], pc: int, instruction: Instruction)->int:
+    condition = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
+    jumpAddress = program[program[pc+2]] if not instruction.mode2 else program[pc+2]
+    if condition == 1:
+        return jumpAddress - pc # Advance to program[pc+2]
+    return 3 # Advance to end of instruction
+
+def jumpIfFalse(program: List[int], pc: int, instruction: Instruction)->int:
+    condition = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
+    jumpAddress = program[program[pc+2]] if not instruction.mode2 else program[pc+2]
+    if condition == 0:
+        return jumpAddress - pc # Advance to program[pc+2]
+    return 3 # Advance to end of instruction
+
+def lessThan(program: List[int], pc: int, instruction: Instruction)->int:
+    try:
+        a = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
+        b = program[program[pc+2]] if not instruction.mode2 else program[pc+2]
+        program[program[pc+3]] = int(a < b)
+    except (IndexError,TypeError) as e:
+        print(f'Caught {e} on instruction: {instruction} in program: {program[pc:pc+4]}')
+    return 4
+
+def equals(program: List[int], pc: int, instruction: Instruction)->int:
+    try:
+        a = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
+        b = program[program[pc+2]] if not instruction.mode2 else program[pc+2]
+        program[program[pc+3]] = int(a == b)
+    except IndexError as e:
+        print(f'Caught {e} on instruction: {instruction} in program: {program[pc:pc+4]}')
+    return 4
+
 def add(program: List[int],pc: int,instruction: Instruction)->int:
     try:
         a = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
@@ -27,14 +62,26 @@ def multiply(program: List[int],pc: int,instruction: Instruction)->int:
     return 4
 
 def takeInput(program: List[int],pc: int,instruction: Instruction)->int:
-    program[program[pc+1]] = input()
+    program[program[pc+1]] = int(input())
     return 2
 
 def sendOutput(program: List[int],pc: int,instruction: Instruction)->int:
-    print(program[program[pc+1]])
+    try:
+        a = program[program[pc+1]] if not instruction.mode1 else program[pc+1]
+        print(a)
+    except IndexError as e:
+        print(f'Caught {e} on instruction: {instruction} in program: {program[pc:pc+4]}')
     return 2
 
-opcodes = {1: add, 2: multiply, 3: takeInput, 4: sendOutput}
+opcodes = {1: add, 
+    2: multiply, 
+    3: takeInput, 
+    4: sendOutput, 
+    5: jumpIfTrue,
+    6: jumpIfFalse,
+    7: lessThan,
+    8: equals,
+}
 
 def instructionDecode(opcode: int)->Instruction:
     opcodeList = [i for i in str(opcode)]
@@ -52,18 +99,24 @@ def runProgram(program: List[int])->List[int]:
     while pc < len(program) and program[pc] != 99:
         instruction = instructionDecode(program[pc])
         if int(instruction.opcode) not in opcodes:
-            print(f'Error: Encountered unknown opcode {instruction.opcode} at index {pc}')
+            print(f'Error: Encountered unknown opcode {instruction.opcode} at index {pc} in {program}')
             return program
         advance = opcodes[int(instruction.opcode)](program,pc,instruction)
         pc += advance
     return program
 
 if __name__ == '__main__':
-    with open('input.txt') as f:
+    if len(sys.argv) > 1:
+        fn = sys.argv[1]
+    else:
+        fn = 'input.txt'
+    with open(fn) as f:
         program = [int(i) for i in f.readline().split(',')]
-        runProgram(program)
+        result = runProgram(program)
 
 import pytest
+
+runInstruction = lambda op,p,pc,i: op(p,pc,i)
 def test_correctOp():
     testInput = Instruction('01','0','0','0')
     op = opcodes[int(testInput.opcode)]
@@ -152,6 +205,23 @@ def test_multiply():
     assert testProgram == expected
 
 @pytest.mark.skip(reason='No way to mock input currently')
+def testrunProgram(capfd):
+    testInput = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
+    runProgram(testInput)
+    captured = capfd.readouterr()
+    assert captured.out.strip() == 1
+
+    testInput = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
+    runProgram(testInput)
+    assert captured.out.strip() == 0
+
+    testInput = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+        1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,
+        46,1101,1000,1,20,4,20,1105,1,46,98,99]
+    runProgram(testInput)
+    assert captured.out.strip() == 0
+
+@pytest.mark.skip(reason='No way to mock input currently')
 def test_takeInput(): #
     testProgram = [3,0]
     testInstruction = Instruction(3,0,0,0)
@@ -171,3 +241,56 @@ def test_sendOutput(capfd):
     captured = capfd.readouterr()
     assert captured.out.strip() == str(outputValue)
 
+def test_jumpIfFalse():
+    testInput = [6,1,0]
+    pc = 0
+    pc = pc + jumpIfFalse(testInput,pc,Instruction('06',True,False,False))
+    assert pc == 3
+
+    testInput = [6,0,0]
+    pc = 0
+    pc = pc + jumpIfFalse(testInput,pc,Instruction('06',True,False,False))
+    assert pc == 0
+
+def test_jumpIfTrue():
+    testInput = [5,1,0]
+    pc = 0
+    pc = pc + jumpIfTrue(testInput,pc,Instruction('05',True,False,False))
+    assert pc == 0
+
+    testInput = [5,0,0]
+    pc = 0
+    pc = pc + jumpIfTrue(testInput,pc,Instruction('05',True,False,False))
+    assert pc == 3
+
+def test_lessThan():
+    testInput = [7,1,2,3]
+    pc = 0
+    lessThan(testInput,pc,Instruction('07',True,True,False))
+    assert testInput[-1] == 1
+
+    testInput = [7,2,1,3]
+    pc = 0
+    lessThan(testInput,pc,Instruction('07',True,True,False))
+    assert testInput[-1] == 0
+
+    testInput = [7,4,5,5,1,2]
+    pc = 0
+    lessThan(testInput,pc,Instruction('07',False,False,False))
+    assert testInput[-1] == 1 
+
+    testInput = [7,4,5,5,2,1]
+    pc = 0
+    lessThan(testInput,pc,Instruction('07',False,False,False))
+    assert testInput[-1] == 0
+
+def test_equals():
+    testInput = [8,5,5,3]
+    pc = 0
+    equals(testInput,pc,Instruction('08',True,True,False))
+    assert testInput[-1] == 1
+
+    testInput = [8,5,4,3]
+    pc = 0
+    equals(testInput,pc,Instruction('08',True,True,False))
+    assert testInput[-1] == 0
