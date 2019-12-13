@@ -17,37 +17,6 @@ def check(password: int)->bool:
             zeros = 0
     return duplicate or zeros == 2
 
-def check_test():
-    testNum = 1
-    print(f'Test #{testNum}',end='')
-    testInput = 112233
-    expected = True
-    result = check(testInput)
-    if result != expected:
-        print(f'Failed. {result} != {expected}')
-    else:
-        print(f'Passed.')
-
-    testNum += 1
-    print(f'Test #{testNum}',end='')
-    testInput = 123444
-    expected = False
-    result = check(testInput)
-    if result != expected:
-        print(f'Failed. {result} != {expected}')
-    else:
-        print(f'Passed.')
-
-    testNum += 1
-    print(f'Test #{testNum}',end='')
-    testInput = 111122
-    expected = True
-    result = check(testInput)
-    if result != expected:
-        print(f'Failed. {result} != {expected}')
-    else:
-        print(f'Passed.')
-
 def usingAddition(low: int,high: int)->int:
     curr = low
     count = 0
@@ -59,6 +28,21 @@ def usingAddition(low: int,high: int)->int:
 
 
 if __name__ == '__main__':
-    #check_test()
     print(usingAddition(273025,767253))
+
+def test_check():
+    testInput = 112233
+    expected = True
+    result = check(testInput)
+    assert result == expected
+
+    testInput = 123444
+    expected = False
+    result = check(testInput)
+    assert result == expected
+
+    testInput = 111122
+    expected = True
+    result = check(testInput)
+    assert result == expected
 
