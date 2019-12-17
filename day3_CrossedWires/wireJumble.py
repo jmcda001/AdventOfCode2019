@@ -1,6 +1,6 @@
 import sys
 import copy
-from typing import List, Generator, NamedTuple
+from typing import List, Generator, NamedTuple, Callable
 from collections import namedtuple,defaultdict
 
 class Point(NamedTuple):
@@ -78,10 +78,8 @@ def wireJumble_hash(wireA: List[str],wireB: List[str])->(int,Point):
                     break
         if possibleIntersection is None:
             continue
-        smallestMH = lambda p: manhattanDistance(origin,p) < minDistance #part 1
-        smallestSteps = lambda p: possibleSteps + steps < minDistance #part 2
-        closest = smallestSteps
-        if  minDistance is None or closest(possibleIntersection):
+        comparison = lambda p,minDistance: possibleSteps + steps < minDistance #part 2
+        if  minDistance is None or comparison(possibleIntersection,minDistance):
             minDistance = possibleSteps + steps
             solution = possibleIntersection
 
@@ -89,8 +87,8 @@ def wireJumble_hash(wireA: List[str],wireB: List[str])->(int,Point):
 
 
 def wireJumble(wireA: List[str],wireB: List[str])->(int,Point):
-    allA = expandPoints(wireA)
-    allB = expandPoints(wireB)
+    allA = [i[0] for i in expandPoints(wireA)]
+    allB = [i[0] for i in expandPoints(wireB)]
     intersections = set(allA[1:]).intersection(set(allB[1:]))
     minDistance = None
     solution = None
@@ -106,6 +104,14 @@ def readFile(fn:str)->(List[str],List[str]):
         wireB = f.readline().split(',')
         return wireA,wireB
     return [],[]
+
+def part1(fn: str):
+    wireA,wireB = readFile(fn)
+    return wireJumble(wireA,wireB)[0]
+
+def part2(fn: str):
+    wireA,wireB = readFile(fn)
+    return wireJumble_hash(wireA,wireB)[0]
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

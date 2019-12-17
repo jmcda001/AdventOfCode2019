@@ -16,13 +16,6 @@ class jumpIfTrue(Instruction):
         condition = (lambda p,pc: p[pc+1]) if self.mode1 else (lambda p,pc: p[p[pc+1]])
         jumpAddress = (lambda p,pc: p[pc+2]) if self.mode2 else (lambda p,pc: p[p[pc+2]])
         self.execute = (lambda p,pc: (jumpAddress(p,pc) - pc if condition(p,pc) == 1 else 3))
-j = jumpIfTrue((True,True,False))
-testInput = [5,0,1]
-pc = 0
-breakpoint()
-j.execute(testInput,pc)
-print(inspect.getsource(j.execute))
-print(inspect.getsource(j.execute))
         
 def jumpIfTrue(program: List[int], pc: int, instruction: Instruction)->int:
     condition = program[program[pc+1]] if not instruction.mode1 else program[pc+1]

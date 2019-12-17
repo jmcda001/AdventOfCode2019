@@ -1,11 +1,23 @@
 import math
 from typing import List
 
+def part2(fn: str):
+    with open(fn) as f:
+        masses = [int(m) for m in f.readlines()]
+        return withFuelWeight(masses)
+    return 0
+
 def withoutFuelWeight(masses: List[int]) -> int:
     fuelSum = 0
     for mass in masses:
         fuelSum += math.floor(mass / 3) - 2
     return fuelSum
+
+def part1(fn: str):
+    with open(fn) as f:
+        masses = [int(m) for m in f.readlines()]
+        return withoutFuelWeight(masses)
+    return 0
 
 def withFuelWeight(masses: List[int]) -> int:
     fuelSum = 0

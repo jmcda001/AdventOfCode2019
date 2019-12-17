@@ -17,47 +17,6 @@ def runProgram(program: List[int])->List[int]:
         pc += ADV
     return program
 
-def test():
-    # Test 1
-    testInput = [1,0,0,0,99]
-    expected = [2,0,0,0,99]
-    print(f'Running program on {testInput}...',end='')
-    output = runProgram(testInput)
-    if output != expected:
-        print(f'Received {output} but expected {expected}')
-    else:
-        print('Passed')
-    
-    # Test 2
-    testInput = [2,3,0,3,99]
-    expected = [2,3,0,6,99]
-    print(f'Running program on {testInput}...',end='')
-    output = runProgram(testInput)
-    if output != expected:
-        print(f'Received {output} but expected {expected}')
-    else:
-        print('Passed')
-    
-    # Test 3
-    testInput = [2,4,4,5,99,0]
-    expected = [2,4,4,5,99,9801]
-    print(f'Running program on {testInput}...',end='')
-    output = runProgram(testInput)
-    if output != expected:
-        print(f'Received {output} but expected {expected}')
-    else:
-        print('Passed')
-    
-    # Test 4
-    testInput = [1,1,1,4,99,5,6,0,99]
-    expected = [30,1,1,4,2,5,6,0,99]
-    print(f'Running program on {testInput}...',end='')
-    output = runProgram(testInput)
-    if output != expected:
-        print(f'Received {output} but expected {expected}')
-    else:
-        print('Passed')
-    
 if __name__ == '__main__':
     with open('input.txt') as f:
         program = [int(i) for i in f.readline().split(',')]
@@ -77,3 +36,26 @@ if __name__ == '__main__':
         output = runProgram(program)
         print(f'Output at index 0 after running modified program is {output[0]}')
         print(f'100 * noun + verb? {100 * noun + verb}')
+
+def test_runProgram():
+    testInput = [1,0,0,0,99]
+    expected = [2,0,0,0,99]
+    output = runProgram(testInput)
+    assert output == expected
+    
+    testInput = [2,3,0,3,99]
+    expected = [2,3,0,6,99]
+    output = runProgram(testInput)
+    assert output == expected
+    
+    testInput = [2,4,4,5,99,0]
+    expected = [2,4,4,5,99,9801]
+    output = runProgram(testInput)
+    assert output == expected
+    
+    testInput = [1,1,1,4,99,5,6,0,99]
+    expected = [30,1,1,4,2,5,6,0,99]
+    output = runProgram(testInput)
+    assert output == expected
+    
+    

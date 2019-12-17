@@ -11,7 +11,7 @@ class Program:
     isa: Dict[str, Callable[[List[int],int,Instruction],int]]
     pc: int
 
-    def __init__(self,i):
+    def __init__(self,i: List[int]):
         self.instructions = i
 
     def instructionDecode(self,opcode: int)->Instruction:
@@ -22,7 +22,7 @@ class Program:
         opcodeList = extension+opcodeList
         opcodeValue = ''.join(opcodeList[3:])
         modes = bool(int(opcodeList[2])),bool(int(opcodeList[1])),bool(int(opcodeList[0]))
-        return Instruction(opcodeValue,*modes)
+        return Instruction(opcodeValue,modes)
 
     def run(self):
         self.pc = 0

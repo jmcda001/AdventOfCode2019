@@ -1,4 +1,5 @@
 import sys
+from IntcodeComputer.intcode import Program
 from typing import List, NamedTuple
 from collections import namedtuple
 
@@ -105,6 +106,32 @@ def runProgram(program: List[int])->List[int]:
         pc += advance
     return program
 
+def part1(fn: str):
+    pass
+
+def part2(fn: str):
+    pass
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        fn = sys.argv[1]
+    else:
+        fn = 'input.txt'
+    with open(fn) as f:
+        program = [int(i) for i in f.readline().split(',')]
+        result = runProgram(program)
+
+import pytest
+
+runInstruction = lambda op,p,pc,i: op(p,pc,i)
+def test_correctOp():
+    testInput = Instruction('01','0','0','0')
+    op = opcodes[int(testInput.opcode)]
+    assert op is add
+
+    testInput = Instruction('02','0','0','0')
+    op = opcodes[int(testInput.opcode)]
+    assert op is multiply
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         fn = sys.argv[1]
